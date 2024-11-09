@@ -1,41 +1,44 @@
 package com.ticketing_system.controller;
 
-import com.ticketing_system.config.ConfigReader;
 import com.ticketing_system.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URISyntaxException;
+
 @RestController
 @RequestMapping("/api/config")
 public class ConfigController {
-
-    private final ConfigReader configReader = new ConfigReader();
 
     @Autowired
     private ConfigService configService;
 
     @GetMapping("/total-tickets")
     public String getTotalTickets() {
-        return configReader.getTotalTickets();
+        return configService.getTotalTickets();
     }
 
     @GetMapping("/max-tickets")
     public String getMaxTickets() {
-        return configReader.getMaxTicketCapacity();
+        return configService.getMaxTicketCapacity();
     }
 
     @GetMapping("/ticket-release-rate")
     public String getTicketReleaseRate() {
-        return configReader.getTicketReleaseRate();
+        return configService.getTicketReleaseRate();
     }
 
     @GetMapping("/customer-retrieval-rate")
     public String getCustomerRetrievalRate() {
-        return configReader.getCustomerRetrievalRate();
+        return configService.getCustomerRetrievalRate();
     }
 
     @PutMapping
-    public void updateProperty(@RequestParam String key, @RequestParam String value) {
-        configService.updateProperty(key, value);
+    public void updateProperty(@RequestParam String key, @RequestParam String value){
+        try {
+            configService.updateProperty(key, value);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
