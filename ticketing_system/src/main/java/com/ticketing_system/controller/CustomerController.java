@@ -1,7 +1,7 @@
 package com.ticketing_system.controller;
 
 import com.ticketing_system.entity.Customer;
-import com.ticketing_system.service.CustomerService;
+import com.ticketing_system.service.CustomerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,39 +12,39 @@ import java.util.List;
 public class CustomerController {
 
     @Autowired
-    private CustomerService customerService;
+    private CustomerServiceImpl customerServiceImpl;
 
     @GetMapping
     public List<Customer> getAllCustomers() {
-        CustomerService.CustomerThread fetchAllThread = customerService.new CustomerThread("fetchAll", null, null);
+        CustomerServiceImpl.CustomerThread fetchAllThread = customerServiceImpl.new CustomerThread("fetchAll", null, null);
         fetchAllThread.start();
-        return customerService.getAllCustomers();
+        return customerServiceImpl.getAllCustomers();
     }
 
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable Integer id) {
-        CustomerService.CustomerThread fetchByIdThread = customerService.new CustomerThread("fetchById", id, null);
+        CustomerServiceImpl.CustomerThread fetchByIdThread = customerServiceImpl.new CustomerThread("fetchById", id, null);
         fetchByIdThread.start();
-        return customerService.getCustomerById(id);
+        return customerServiceImpl.getCustomerById(id);
     }
 
     @PostMapping
     public Customer createCustomer(@RequestBody Customer customer) {
-        CustomerService.CustomerThread saveThread = customerService.new CustomerThread("save", null, customer);
+        CustomerServiceImpl.CustomerThread saveThread = customerServiceImpl.new CustomerThread("save", null, customer);
         saveThread.start();
-        return customerService.saveCustomer(customer);
+        return customerServiceImpl.saveCustomer(customer);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Integer id) {
-        CustomerService.CustomerThread deleteThread = customerService.new CustomerThread("delete", id, null);
+        CustomerServiceImpl.CustomerThread deleteThread = customerServiceImpl.new CustomerThread("delete", id, null);
         deleteThread.start();
-        customerService.deleteCustomer(id);
+        customerServiceImpl.deleteCustomer(id);
     }
 
     @GetMapping("/login")
     public boolean customerVerification(@RequestParam String username, @RequestParam String password) {
-        return customerService.customerVerification(username, password);
+        return customerServiceImpl.customerVerification(username, password);
     }
 }
 

@@ -14,21 +14,21 @@ import java.util.List;
 public class PurchaseController {
 
     @Autowired
-    private PurchaseService purchaseService;
+    private PurchaseServiceImpl purchaseServiceImpl;
 
     @GetMapping
     public List<Purchase> getAllPurchases(){
-        return purchaseService.getAllPurchases();
+        return purchaseServiceImpl.getAllPurchases();
     }
 
     @GetMapping("/{id}")
     public Purchase getPurchaseById(@PathVariable Integer id) {
-        return purchaseService.getPurchaseById(id);
+        return purchaseServiceImpl.getPurchaseById(id);
     }
 
     @PostMapping
     public Purchase createPurchase(@RequestBody Purchase purchase) {
-        return purchaseService.savePurchase(purchase);
+        return purchaseServiceImpl.savePurchase(purchase);
     }
 
 }
