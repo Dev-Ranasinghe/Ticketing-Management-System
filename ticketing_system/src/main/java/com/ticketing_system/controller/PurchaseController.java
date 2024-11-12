@@ -1,8 +1,8 @@
 package com.ticketing_system.controller;
 
-import com.ticketing_system.entity.Customer;
 import com.ticketing_system.entity.Purchase;
 import com.ticketing_system.service.PurchaseService;
+import com.ticketing_system.service.PurchaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -22,7 +22,11 @@ public class Event {
     private String eventLocation;
     @Column(name = "totalTickets", nullable = false)
     private Integer totalTickets;
+    @Column(name = "eventStatus", nullable = false)
+    private boolean eventStatus;
     @ManyToOne
     @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id", nullable = false)
     private Vendor vendor;
 }
+
+// ticket pool table (eventId, availableReleaseTicketCount)
