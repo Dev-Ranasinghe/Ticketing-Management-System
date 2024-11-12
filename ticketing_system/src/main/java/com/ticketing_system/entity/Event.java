@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 
 @Data //getters and setters auto generated
 @AllArgsConstructor //generate constructor with all the attributes
