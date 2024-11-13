@@ -13,9 +13,9 @@ public class TicketPool {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "poolId")
+    @Column(name = "pool_id")
     private Integer poolId;
-    @Column(name = "releasedTicketCount", nullable = false)
+    @Column(name = "released_ticket_count", nullable = false)
     private Integer releasedTicketCount;
     @OneToOne
     @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)

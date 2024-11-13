@@ -1,3 +1,4 @@
+
 package com.ticketing_system.controller;
 
 import com.ticketing_system.entity.Vendor;
@@ -27,12 +28,22 @@ public class VendorController {
         // Create and start a thread to handle fetching vendor by id
         VendorServiceImpl.VendorThread fetchByIdThread = vendorServiceImpl.new VendorThread("fetchById", id, null);
         fetchByIdThread.start();
-        return vendorServiceImpl.getVendorById(id);
+        try{
+            return vendorServiceImpl.getVendorById(id);
+        }
+        finally {
+            fetchByIdThread.interrupt();
+        }
     }
 
     @GetMapping("/email/{email}")
     public Vendor getVendorByEmail(@PathVariable String email) {
         return vendorServiceImpl.getVendorByEmail(email);
+    }
+
+    @GetMapping("/email-id/{email}")
+    public Integer getVendorIdByEmail(@PathVariable String email) {
+        return vendorServiceImpl.findVendorIdByVendorEmail(email);
     }
 
     @PostMapping

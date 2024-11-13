@@ -1,7 +1,4 @@
-import Controller.AdminController;
-import Controller.CustomerController;
-import Controller.EventController;
-import Controller.VendorController;
+import Controller.*;
 import SystemParameters.ConfigParameters;
 
 import java.io.IOException;
@@ -13,10 +10,7 @@ public class CliMain {
 
     public final static Scanner scanner = new Scanner(System.in);
     public static ConfigParameters configParameters = new ConfigParameters();
-    public static AdminController adminController = new AdminController();
-    public static VendorController vendorController = new VendorController();
-    public static EventController eventController = new EventController();
-    public static CustomerController customerController = new CustomerController();
+    public static MenuController menuController;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -25,9 +19,7 @@ public class CliMain {
         // Main loop to display the welcome menu and sub-menu
         while (!exit) {
             displayWelcomeTable();
-            System.out.print("Enter your choice (1-3 for roles, 4 to exit): ");
-            int roleChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume the newline
+            int roleChoice = MenuController.getNumberInRange(1,4);
 
             switch (roleChoice) {
                 case 1:
@@ -62,8 +54,12 @@ public class CliMain {
     }
 
     private static void handleAdminLogin() {
+        AdminController adminController = new AdminController();
         if (adminController.adminVerification()) {
-            adminMenu();
+            VendorController vendorController = new VendorController();
+            CustomerController customerController = new CustomerController();
+            adminMenu(vendorController, customerController);
+
         } else {
             System.out.println("Invalid login. Returning to main menu.");
         }
@@ -73,26 +69,33 @@ public class CliMain {
         System.out.print("Are you a registered vendor? (yes/no): ");
         String response = scanner.nextLine().trim().toLowerCase();
 
+        VendorController vendorController = new VendorController();
         if (response.equals("yes")) {
-            if (vendorLogin()) {
-                vendorMenu();
+            if (vendorLogin(vendorController)) {
+                System.out.println("Login successful.");
+                // After successful login, proceed directly to vendor menu
+                vendorMenu(vendorController); // Pass the vendorController object
             } else {
-                System.out.println("Invalid login. Returning to main menu.");
+            System.out.println("Invalid login. Returning to main menu.");
             }
-        } else if (response.equals("no")) {
+        }
+        else if(response.equals("no")){
             vendorController.createVendorFromInput();
-            vendorMenu();
-        } else {
+        }
+        else {
             System.out.println("Invalid response. Returning to main menu.");
         }
     }
 
     private static void handleCustomerLogin() {
+
+        CustomerController customerController = new CustomerController();
+
         System.out.print("Are you a registered customer? (yes/no): ");
         String response = scanner.nextLine().trim().toLowerCase();
 
         if (response.equals("yes")) {
-            if (customerLogin()) {
+            if (customerLogin(customerController)) {
                 customerMenu();
             } else {
                 System.out.println("Invalid login. Returning to main menu.");
@@ -104,64 +107,42 @@ public class CliMain {
         }
     }
 
-    private static boolean adminLogin() {
-        System.out.print("Enter Admin Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter Admin Password: ");
-        String password = scanner.nextLine();
-
-        return "123".equals(username) && "123".equals(password);
-    }
-
-    private static boolean vendorLogin() {
+    private static boolean vendorLogin(VendorController vendorController) {
         System.out.print("Enter Vendor Username: ");
         String username = scanner.nextLine();
         System.out.print("Enter Vendor Password: ");
         String password = scanner.nextLine();
 
-        return vendorController.vendorVerification(username, password);
+        // Verify vendor and store username in VendorController
+        if (vendorController.vendorVerification(username, password)) {
+            // Store username in the controller for further use
+            vendorController.setUsername(username);
+            vendorController.getVendorByEmail(username);
+            return true;
+        }
+        return false;
     }
 
-    private static boolean customerLogin() {
+    private static boolean customerLogin(CustomerController customerController) {
         System.out.print("Enter Customer Username: ");
         String username = scanner.nextLine();
         System.out.print("Enter Customer Password: ");
         String password = scanner.nextLine();
 
-        return "customer".equals(username) && "cust@123".equals(password);
+        return customerController.customerVerification(username, password);
     }
 
-    private static void createVendorAccount() {
-        System.out.println("Registering new vendor...");
-
-        System.out.print("Enter Vendor Name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Enter Vendor Contact (e.g., phone number): ");
-        String contact = scanner.nextLine();
-
-        System.out.print("Enter Vendor Email: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Enter Vendor Password: ");
-        String password = scanner.nextLine();
-
-        System.out.println("Vendor account created successfully.");
-    }
-
-    private static void adminMenu() {
+    private static void adminMenu(VendorController vendorController, CustomerController customerController) {
         boolean exitAdminMenu = false;
 
         while (!exitAdminMenu) {
             System.out.println("\n--- Admin Menu ---");
             System.out.println("1. Set System Parameters");
             System.out.println("2. Manage Vendors");
-            System.out.println("4. Manage Customers");
-            System.out.println("5. Return to Main Menu");
-            System.out.print("Enter your choice: ");
+            System.out.println("3. Manage Customers");
+            System.out.println("4. Return to Main Menu");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int choice = MenuController.getNumberInRange(1,4);
 
             switch (choice) {
                 case 1:
@@ -170,17 +151,22 @@ public class CliMain {
                 case 2:
                     System.out.println("Managing vendors...");
                     vendorController.getAllVendors();
-                    System.out.println("sample text");
+                    if(MenuController.adminDeleteManagement("customer")){
+                        System.out.print("Enter the ID of the customer that needs to be deleted: ");
+                        String deleteId = scanner.nextLine();
+                        vendorController.deleteVendor(Integer.parseInt(deleteId));
+                    };
                     break;
                 case 3:
-                    System.out.println("Managing events...");
-                    eventController.getAllEvents();
-                    break;
-                case 4:
                     System.out.println("Managing customers...");
                     customerController.getAllCustomers();
+                    if(MenuController.adminDeleteManagement("customer")){
+                        System.out.print("Enter the ID of the customer that needs to be deleted: ");
+                        String deleteId = scanner.nextLine();
+                        customerController.deleteCustomer(Integer.parseInt(deleteId));
+                    };
                     break;
-                case 5:
+                case 4:
                     exitAdminMenu = true;
                     break;
                 default:
@@ -189,16 +175,32 @@ public class CliMain {
         }
     }
 
-    private static void vendorMenu() {
+    private static void vendorMenu(VendorController vendorController) {
         boolean exitVendorMenu = false;
+        EventController eventController = new EventController();
 
         while (!exitVendorMenu) {
-            System.out.println("\n--- Vendor Menu ---");
-            System.out.println("1. View Existing Events");
-            System.out.println("2. Create Event");
-            System.out.println("3. Edit Event");
-            System.out.println("4. Delete Event");
-            System.out.println("5. Return to Main Menu");
+            String header = "--- " + vendorController.getUsername() + " Vendor Menu ---";
+            int tableWidth = Math.max(header.length(), 38); // Ensures the table width accommodates the header
+
+            // Print the vendor menu in a table format
+            System.out.println("\n" + header);
+
+            // Print top border of the table
+            System.out.println("+".repeat(tableWidth));
+
+            // Print the options
+            System.out.println("| Option" + " ".repeat(tableWidth - 9 - 1) + "|");
+            System.out.println("| 1. View Existing" + " ".repeat(tableWidth - 16 - 1) + "|");
+            System.out.println("| 2. Create Event" + " ".repeat(tableWidth - 16 - 1) + "|");
+            System.out.println("| 3. Edit Event" + " ".repeat(tableWidth - 14 - 1) + "|");
+            System.out.println("| 4. Delete Event" + " ".repeat(tableWidth - 16 - 1) + "|");
+            System.out.println("| 5. Return to Main" + " ".repeat(tableWidth - 18 - 1) + "|");
+
+            // Print bottom border of the table
+            System.out.println("+" + "-".repeat(tableWidth - 2) + "+");
+
+            // Prompt for user input
             System.out.print("Enter your choice: ");
 
             int choice = scanner.nextInt();
@@ -206,10 +208,12 @@ public class CliMain {
 
             switch (choice) {
                 case 1:
-                    System.out.println("Viewing vendor details...");
+                    System.out.println(vendorController.getId());
+                    eventController.getEventsByVendorId(Integer.parseInt(vendorController.getId()));
                     break;
                 case 2:
                     System.out.println("Creating a new event...");
+                    eventController.createEventFromInput(vendorController.getId());
                     break;
                 case 3:
                     System.out.println("Editing an event...");
@@ -287,5 +291,3 @@ public class CliMain {
         }
     }
 }
-
-// main => controller => runnable

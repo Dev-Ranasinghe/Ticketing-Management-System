@@ -1,5 +1,7 @@
 package com.ticketing_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +27,7 @@ public class Event {
     private boolean eventStatus;
     @ManyToOne
     @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id", nullable = false)
+    @JsonBackReference
     private Vendor vendor;
 }
 

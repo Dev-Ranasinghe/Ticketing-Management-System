@@ -11,10 +11,10 @@ public class AdminController {
             String adminUsername = scanner.nextLine();
             System.out.print("Admin password: ");
             String adminPassword = scanner.nextLine();
-            if (!adminUsername.equals("admin")) {
+            if (!adminUsername.equals("l")) {
                 throw new Exception("Invalid Username !!!");
             }
-            if (!adminPassword.equals("admin")) {
+            if (!adminPassword.equals("l")) {
                 throw new Exception("Invalid Password !!!");
             }
             System.out.println("Log-in Success as an Admin :)");

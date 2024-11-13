@@ -1,55 +1,100 @@
 package Controller;
 
-import java.util.Scanner;
-import java.net.http.HttpClient;
+import Service.VendorService;
+
+import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.URI;
-import java.util.concurrent.locks.ReentrantLock;
-
-import Runnable.VendorRunnable;
+import java.net.http.HttpClient;
+import java.util.Scanner;
 
 public class VendorController {
 
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final MenuController menuController = new MenuController();
 
-    public void createVendorFromInput() {
-        Scanner scanner = new Scanner(System.in);
+    private String username;
+    private String id;
 
-        // Gather vendor details from user input
-        System.out.print("Enter Vendor Name: ");
-        String name = scanner.nextLine();
+    public String getId() {
+        return id;
+    }
 
-        System.out.print("Enter Vendor Contact (e.g., phone number): ");
-        String contact = scanner.nextLine();
+    // Set the username during login
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-        System.out.print("Enter Vendor Email: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Enter Vendor Password: ");
-        String password = scanner.nextLine();
-
-        // Create JSON string from user inputs
-        String vendorJson = String.format(
-                "{\"vendorName\": \"%s\", \"vendorContact\": \"%s\", \"vendorEmail\": \"%s\", \"vendorPassword\": \"%s\"}",
-                name, contact, email, password);
-
-        // Create a VendorRunnable instance with the 'save' task to save the vendor
-        VendorRunnable vendorRunnable = new VendorRunnable("save", (Integer) null, vendorJson);
-
-        // Run the VendorRunnable in a new thread
-        Thread thread = new Thread(vendorRunnable);
-        thread.start();
-
-        System.out.println("Vendor creation request has been sent.");
+    // Get the stored username
+    public String getUsername() {
+        return this.username;
     }
 
     public void getAllVendors() {
-        VendorRunnable vendorRunnable = new VendorRunnable("fetchAll", (Integer) null, null);
-        // Run the VendorRunnable in a new thread
-        Thread thread = new Thread(vendorRunnable);
+        // Create a new thread for each service task and start it
+        VendorService service = new VendorService("fetchAll", null, null, null);
+        Thread thread = new Thread(service);
         thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete before moving on
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getVendorById(int vendorId) {
+        VendorService service = new VendorService("fetchById", vendorId, null, null);
+        Thread thread = new Thread(service);
+        thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete before moving on
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getVendorByEmail(String vendorEmail) {
+        // Create the service with the task and vendor email
+        VendorService service = new VendorService("fetchByEmail", null, null, vendorEmail);
+
+        // Create a thread to run the service task asynchronously
+        Thread thread = new Thread(service);
+        thread.start();
+
+        try {
+            // Wait for the thread to finish before moving on
+            thread.join();
+
+            this.id = service.fetchVendorIdByEmail(vendorEmail); // Fetch vendor id from service
+
+            // Print or use the id in the controller
+            System.out.println("Vendor ID set in controller: " + this.id);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveVendor(String vendorJson) {
+        VendorService service = new VendorService("save", null, vendorJson, null);
+        Thread thread = new Thread(service);
+        thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete before moving on
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteVendor(int vendorId) {
+        VendorService service = new VendorService("delete", vendorId, null, null);
+        Thread thread = new Thread(service);
+        thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete before moving on
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean vendorVerification(String username, String password) {
@@ -73,5 +118,31 @@ public class VendorController {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public void createVendorFromInput() {
+        Scanner scanner = new Scanner(System.in);
+
+        // Gather vendor details from user input
+        String name = menuController.getValidInput("Enter Vendor Name: ", "string");
+        String contact = menuController.getValidInput("Enter Vendor Contact (e.g., phone number): ", "number");
+        String email = menuController.getValidInput("Enter Vendor Email: ", "email");
+        String password = menuController.notNullChecker("Enter Vendor Password: ", "vendor password");
+
+        // Create JSON string from user inputs
+        String vendorJson = String.format(
+                "{\"vendorName\": \"%s\", \"vendorContact\": \"%s\", \"vendorEmail\": \"%s\", \"vendorPassword\": \"%s\"}",
+                name, contact, email, password);
+
+        VendorService service = new VendorService("save", null, vendorJson, null);
+        Thread thread = new Thread(service);
+        thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete before moving on
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Vendor creation request has been sent.");
     }
 }

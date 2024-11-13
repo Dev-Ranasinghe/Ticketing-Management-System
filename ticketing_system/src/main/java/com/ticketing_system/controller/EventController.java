@@ -32,6 +32,7 @@ public class EventController {
 
     @PostMapping
     public Event createEvent(@RequestBody Event event) {
+        System.out.println(event);
         return eventServiceImpl.saveEvent(event);
     }
 
