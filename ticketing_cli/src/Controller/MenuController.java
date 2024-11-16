@@ -21,13 +21,13 @@ public class MenuController {
         }
     }
 
-    public static int getNumberInRange(int min, int max) {
+    public int getNumberInRange(int min, int max) {
         Scanner scanner = new Scanner(System.in);
         int number;
 
         // Loop until the input is within the specified range
         while (true) {
-            System.out.print("Enter your choice (valid choices 1 - 4): ");
+            System.out.print("Enter your choice (valid choices " + min + " - " + max + " ): ");
             String input = scanner.nextLine(); // Get the input as a string
 
             try {
@@ -89,4 +89,23 @@ public class MenuController {
             }
         }
     }
+
+    public String getYesOrNo(String message) {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+
+        while (true) {
+            System.out.print(message); // Display custom message
+            input = scanner.nextLine().trim().toLowerCase();
+
+            if (input.equals("y")) {
+                return input; // Return true for "y"
+            } else if (input.equals("n")) {
+                return input; // Return false for "n"
+            } else {
+                System.out.println("Invalid input. Please enter 'y' or 'n'.");
+            }
+        }
+    }
+
 }

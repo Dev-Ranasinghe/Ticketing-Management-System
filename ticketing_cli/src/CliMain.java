@@ -10,16 +10,16 @@ public class CliMain {
 
     public final static Scanner scanner = new Scanner(System.in);
     public static ConfigParameters configParameters = new ConfigParameters();
-    public static MenuController menuController;
+    public static MenuController menuController = new MenuController();
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
 
         boolean exit = false;
 
         // Main loop to display the welcome menu and sub-menu
         while (!exit) {
             displayWelcomeTable();
-            int roleChoice = MenuController.getNumberInRange(1,4);
+            int roleChoice = menuController.getNumberInRange(1,4);
 
             switch (roleChoice) {
                 case 1:
@@ -65,12 +65,11 @@ public class CliMain {
         }
     }
 
-    private static void handleVendorLogin() {
-        System.out.print("Are you a registered vendor? (yes/no): ");
-        String response = scanner.nextLine().trim().toLowerCase();
+    private static void handleVendorLogin() throws Exception {
+        String response = menuController.getYesOrNo("Are you a registered vendor? (yes/no): ");
 
         VendorController vendorController = new VendorController();
-        if (response.equals("yes")) {
+        if (response.equals("y")) {
             if (vendorLogin(vendorController)) {
                 System.out.println("Login successful.");
                 // After successful login, proceed directly to vendor menu
@@ -79,7 +78,7 @@ public class CliMain {
             System.out.println("Invalid login. Returning to main menu.");
             }
         }
-        else if(response.equals("no")){
+        else if(response.equals("n")){
             vendorController.createVendorFromInput();
         }
         else {
@@ -142,7 +141,7 @@ public class CliMain {
             System.out.println("3. Manage Customers");
             System.out.println("4. Return to Main Menu");
 
-            int choice = MenuController.getNumberInRange(1,4);
+            int choice = menuController.getNumberInRange(1,4);
 
             switch (choice) {
                 case 1:
@@ -175,7 +174,7 @@ public class CliMain {
         }
     }
 
-    private static void vendorMenu(VendorController vendorController) {
+    private static void vendorMenu(VendorController vendorController) throws Exception {
         boolean exitVendorMenu = false;
         EventController eventController = new EventController();
 
@@ -233,24 +232,34 @@ public class CliMain {
     public static void setSystemParameters() {
         try {
             displaySystemParameters(configParameters);
-            System.out.print("Do you want to update any property? (yes/no): ");
-            String response = scanner.nextLine().trim().toLowerCase();
+            String response = menuController.getYesOrNo("Do you want to update any property? (y/n): ");
 
-            while (response.equals("yes")) {
-                System.out.print("Enter the property key to update: ");
-                String key = scanner.nextLine().trim();
-                System.out.print("Enter the new value: ");
-                String value = scanner.nextLine().trim();
+            while (response.equals("y")) {
+                int key = menuController.getNumberInRange(1, 3);
+                String value = menuController.getValidInput("Enter the value: ", "number");
+                String systemParameter;
+                if(key == 1){
+                    if(Integer.parseInt(configParameters.getTotalTickets()) > Integer.parseInt(value) ){
+                        throw new Exception("Max Ticket Capacity can't be lesser than Total Tickets !");
+                    }
+                    systemParameter = "maxTicketCapacity";
+                } else if(key == 2) {
+                    systemParameter = "ticketReleaseRate";
+                }
+                else{
+                    systemParameter = "customerRetrievalRate";
+                }
 
-                configParameters.updateProperty(key, value);
-                System.out.print("Do you want to update another property? (yes/no): ");
-                response = scanner.nextLine().trim().toLowerCase();
+                configParameters.updateProperty(systemParameter, value);
+                response = menuController.getYesOrNo("Do you want to update any property? (y/n): ");
                 displaySystemParameters(configParameters);
             }
 
             System.out.println("Exiting configuration update process.");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 

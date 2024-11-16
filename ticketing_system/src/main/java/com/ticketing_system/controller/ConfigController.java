@@ -35,10 +35,6 @@ public class ConfigController {
 
     @PutMapping
     public void updateProperty(@RequestParam String key, @RequestParam String value){
-        try {
-            configService.updateProperty(key, value);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        configService.updateProperty(key, value);
     }
 }

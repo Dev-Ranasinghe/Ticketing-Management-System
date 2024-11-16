@@ -1,6 +1,7 @@
 package com.ticketing_system.service;
 
 import com.ticketing_system.entity.Event;
+import com.ticketing_system.entity.TicketPool;
 import com.ticketing_system.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
