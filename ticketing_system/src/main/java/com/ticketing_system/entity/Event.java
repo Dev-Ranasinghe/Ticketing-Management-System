@@ -27,7 +27,9 @@ public class Event {
     private String eventLocation;
     @Column(name = "totalTickets", nullable = false)
     private Integer totalTickets;
-    @Column(name = "eventStatus", nullable = false)
+    @Column(name = "ticket_price", nullable = false)
+//    private Integer ticketPrice;
+//    @Column(name = "eventStatus", nullable = false)
     private boolean eventStatus;
     @ManyToOne
     @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id", nullable = false)
@@ -44,6 +46,7 @@ public class Event {
         this.eventLocation = eventLocation;
         this.eventName = eventName;
         this.totalTickets = totalTickets;
+//        this.ticketPrice = ticketPrice;
     }
 
     ////////////////////
