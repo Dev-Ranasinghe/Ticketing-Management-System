@@ -1,10 +1,8 @@
 package Controller;
 
 import Service.EventService;
-import Service.VendorService;
 import SystemParameters.ConfigParameters;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 public class EventController {
@@ -57,6 +55,39 @@ public class EventController {
         }
     }
 
+    public void activateEvent(int eventId) {
+        EventService service = new EventService("activate", eventId, null, null);
+        Thread thread = new Thread(() -> service.activateEvent(eventId));
+        thread.start();
+        try {
+            thread.join();  // Wait for the thread to complete
+            System.out.println("Event activation request completed.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Integer getTotalTicketsOfEvent(int eventId) {
+        EventService service = new EventService("fetchEventTotalTickets", eventId, null, null);
+
+        // Fetch total tickets as a string
+        String totalTicketsStr = service.fetchTotalTicketsByEventId(eventId);
+
+        if (totalTicketsStr == null) {
+            System.out.println("Failed to fetch total tickets for Event ID: " + eventId);
+            return null; // Return null if the response is invalid
+        }
+
+        try {
+            // Parse and return the integer value
+            return Integer.parseInt(totalTicketsStr);
+        } catch (NumberFormatException e) {
+            return null; // Return null if parsing fails
+        }
+    }
+
+
     public void createEventFromInput(String vendorId) throws Exception {
         Scanner scanner = new Scanner(System.in);
         int availableTickets = Integer.parseInt(configParameters.getMaxTickets()) - Integer.parseInt(configParameters.getTotalTickets());
@@ -71,6 +102,9 @@ public class EventController {
         }
         boolean eventStatus = false;
 
+        int totTickets = Integer.parseInt(configParameters.getTotalTickets());
+        int updatedTotTickets = totTickets + Integer.parseInt(totalTickets);
+        configParameters.updateProperty("totalTickets", String.valueOf(updatedTotTickets));
         // Create JSON string from user inputs
         String eventJson = String.format(
                 "{\"eventName\": \"%s\", \"eventLocation\": \"%s\", \"totalTickets\": %s, \"eventStatus\": %b, \"vendor\": {\"vendorId\": %s}}",

@@ -67,9 +67,6 @@ public class VendorController {
 
             this.id = service.fetchVendorIdByEmail(vendorEmail); // Fetch vendor id from service
 
-            // Print or use the id in the controller
-            System.out.println("Vendor ID set in controller: " + this.id);
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -115,7 +112,6 @@ public class VendorController {
             return Boolean.parseBoolean(response.body());
 
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }

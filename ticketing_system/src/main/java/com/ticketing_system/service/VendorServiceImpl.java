@@ -2,7 +2,6 @@ package com.ticketing_system.service;
 
 import com.ticketing_system.entity.Vendor;
 import com.ticketing_system.repository.VendorRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -10,4 +10,6 @@ public interface EventService {
     public Event saveEvent(Event event);
     public void deleteEvent(Integer id);
     public List<Event> getEventsByVendorId(Integer vendorId);
+    public void activateEvent(Integer eventId);
+    public Integer getTotalTicketsByEventId(Integer eventId);
 }

@@ -11,6 +11,7 @@ public class CustomerController {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private String username;
+    private String id;
 
     // Set the username during login
     public void setUsername(String username) {
@@ -20,6 +21,10 @@ public class CustomerController {
     // Get the stored username
     public String getUsername() {
         return this.username;
+    }
+
+    public String getId(){
+        return this.id;
     }
 
     public void getAllCustomers() {

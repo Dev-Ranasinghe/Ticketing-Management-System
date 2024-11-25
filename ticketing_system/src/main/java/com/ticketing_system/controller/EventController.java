@@ -2,7 +2,10 @@ package com.ticketing_system.controller;
 
 import com.ticketing_system.entity.Event;
 import com.ticketing_system.service.EventServiceImpl;
+import com.ticketing_system.service.TicketPoolServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,8 @@ public class EventController {
 
     @Autowired
     private EventServiceImpl eventServiceImpl;
+    @Autowired
+    private TicketPoolServiceImpl ticketPoolServiceImpl;
 
     @GetMapping
     public List<Event> getAllEvents(){
@@ -30,6 +35,16 @@ public class EventController {
         return eventServiceImpl.getEventsByVendorId(vendorId);
     }
 
+    @GetMapping("/{eventId}/totalTickets")
+    public ResponseEntity<Integer> getTotalTicketsByEventId(@PathVariable Integer eventId) {
+        try {
+            Integer totalTickets = eventServiceImpl.getTotalTicketsByEventId(eventId);
+            return ResponseEntity.ok(totalTickets);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
     @PostMapping
     public Event createEvent(@RequestBody Event event) {
         System.out.println(event);
@@ -41,4 +56,13 @@ public class EventController {
         eventServiceImpl.deleteEvent(id);
     }
 
+    @PostMapping("/{eventId}/activate")
+    public ResponseEntity<String> activateEvent(@PathVariable Integer eventId) {
+        try {
+            eventServiceImpl.activateEvent(eventId);
+            return ResponseEntity.ok("Event activated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

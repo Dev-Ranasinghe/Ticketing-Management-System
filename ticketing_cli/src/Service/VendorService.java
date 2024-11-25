@@ -59,7 +59,6 @@ public class VendorService implements Runnable {
     }
 
     public void fetchAllVendors() {
-        lock.lock();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/api/vendor"))
@@ -113,8 +112,6 @@ public class VendorService implements Runnable {
             System.out.println("----------------------------------------------------------------------------------------");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -142,9 +139,7 @@ public class VendorService implements Runnable {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             // Assuming the response body contains only the vendor ID, as an integer (e.g., "1")
-            String vendorId = response.body().trim();
-            System.out.println("Vendor ID by Email: " + vendorId);
-            return vendorId;
+            return response.body().trim();
         } catch (Exception e) {
             e.printStackTrace();
             return null; // Or any error handling logic
@@ -166,6 +161,7 @@ public class VendorService implements Runnable {
     }
 
     public void deleteVendor(int vendorId) {
+        lock.lock();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/api/vendor/" + vendorId))
@@ -175,6 +171,8 @@ public class VendorService implements Runnable {
             System.out.println("Vendor Deletion Success.");
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
     }
 }

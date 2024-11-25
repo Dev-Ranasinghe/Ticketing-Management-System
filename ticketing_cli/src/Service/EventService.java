@@ -50,6 +50,15 @@ public class EventService implements Runnable {
                     if (eventId != null) {
                         deleteEvent(eventId);
                     }
+                case "fetchEventTotalTickets":
+                    if (eventId != null) {
+                        fetchTotalTicketsByEventId(eventId);
+                    }
+                    break;
+                case "activate":
+                    if (eventId != null) {
+                        activateEvent(eventId);
+                    }
                     break;
                 default:
                     System.out.println("Invalid task specified.");
@@ -58,6 +67,49 @@ public class EventService implements Runnable {
             lock.unlock();
         }
     }
+
+    public String fetchTotalTicketsByEventId(int eventId) {
+        lock.lock();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/api/event/" + eventId + "/totalTickets"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String eventTotalTickets = response.body().trim();
+
+            if (eventTotalTickets.isEmpty()) {
+                System.out.println("API response is empty for Event ID: " + eventId);
+                return null; // Return null if the response is empty
+            }
+
+            System.out.println("Total Tickets API Response: " + eventTotalTickets);
+            return eventTotalTickets;
+        } catch (Exception e) {
+            return null; // Return null if an exception occurs
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // Activate event
+    public void activateEvent(int eventId) {
+        lock.lock();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/api/event/" + eventId + "/activate"))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Event Activation Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
 
     // Fetch all events
     public void fetchAllEvents() {
@@ -104,6 +156,7 @@ public class EventService implements Runnable {
 
             String responseBody = response.body();
 
+            System.out.println();
             // Remove the outer brackets [ ] and split the JSON objects by "},{" (assuming uniform formatting)
             String[] events = responseBody.substring(1, responseBody.length() - 1).split("\\},\\{");
 
@@ -153,7 +206,7 @@ public class EventService implements Runnable {
                         eventId, eventName, eventLocation, totalTickets, eventStatus));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return;
         } finally {
             lock.unlock();
         }

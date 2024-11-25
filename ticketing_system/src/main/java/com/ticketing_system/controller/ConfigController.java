@@ -28,6 +28,11 @@ public class ConfigController {
         return configService.getTicketReleaseRate();
     }
 
+    @GetMapping("/available-tickets")
+    public Integer getAvailableTickets(){
+        return Integer.parseInt(configService.getMaxTicketCapacity()) - Integer.parseInt(configService.getTotalTickets());
+    }
+
     @GetMapping("/customer-retrieval-rate")
     public String getCustomerRetrievalRate() {
         return configService.getCustomerRetrievalRate();

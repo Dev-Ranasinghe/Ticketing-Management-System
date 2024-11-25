@@ -1,6 +1,7 @@
 package com.ticketing_system.service;
 
 import com.ticketing_system.entity.Customer;
+import com.ticketing_system.entity.Vendor;
 import com.ticketing_system.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -23,6 +24,11 @@ public class CustomerServiceImpl implements CustomerService{
 
     public Customer getCustomerById(Integer id) {
         return customerRepository.findById(id).orElse(null);
+    }
+
+    // Get a single vendor by email
+    public Customer getCustomerByEmail(String email) {
+        return customerRepository.findByCustomerEmail(email);
     }
 
     public Customer saveCustomer(Customer customer) {
@@ -59,6 +65,11 @@ public class CustomerServiceImpl implements CustomerService{
             valid = true;
         }
         return valid;
+    }
+
+    public Integer findCustomerIdByVendorEmail(String email) {
+        Customer customer = customerRepository.findByCustomerEmail(email);
+        return customer.getCustomerId();
     }
 
     // Inner class to handle Customer operations as threads

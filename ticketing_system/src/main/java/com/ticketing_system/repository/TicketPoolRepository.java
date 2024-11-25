@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TicketPoolRepository extends JpaRepository <TicketPool, Integer> {
 
+    TicketPool findByEvent_EventId(Integer eventId);
+    void deleteByEvent_EventId(Integer eventId);
 }

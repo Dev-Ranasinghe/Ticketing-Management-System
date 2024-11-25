@@ -1,4 +1,5 @@
 import Controller.*;
+import Service.TicketPoolService;
 import SystemParameters.ConfigParameters;
 
 import java.io.IOException;
@@ -66,14 +67,15 @@ public class CliMain {
     }
 
     private static void handleVendorLogin() throws Exception {
-        String response = menuController.getYesOrNo("Are you a registered vendor? (yes/no): ");
+        String response = menuController.getYesOrNo("Are you a registered vendor? (y/n): ");
 
         VendorController vendorController = new VendorController();
+        TicketPoolController ticketPoolController = new TicketPoolController();
         if (response.equals("y")) {
             if (vendorLogin(vendorController)) {
                 System.out.println("Login successful.");
                 // After successful login, proceed directly to vendor menu
-                vendorMenu(vendorController); // Pass the vendorController object
+                vendorMenu(vendorController, ticketPoolController); // Pass the vendorController object
             } else {
             System.out.println("Invalid login. Returning to main menu.");
             }
@@ -88,12 +90,9 @@ public class CliMain {
 
     private static void handleCustomerLogin() {
 
+        String response = menuController.getYesOrNo("Are you a registered customer? (y/n): ");
         CustomerController customerController = new CustomerController();
-
-        System.out.print("Are you a registered customer? (yes/no): ");
-        String response = scanner.nextLine().trim().toLowerCase();
-
-        if (response.equals("yes")) {
+        if (response.equals("y")) {
             if (customerLogin(customerController)) {
                 customerMenu();
             } else {
@@ -128,7 +127,14 @@ public class CliMain {
         System.out.print("Enter Customer Password: ");
         String password = scanner.nextLine();
 
-        return customerController.customerVerification(username, password);
+        // Verify vendor and store username in VendorController
+        if (customerController.customerVerification(username, password)) {
+            // Store username in the controller for further use
+            customerController.setUsername(username);
+//            customerController.ge(username);
+            return true;
+        }
+        return false;
     }
 
     private static void adminMenu(VendorController vendorController, CustomerController customerController) {
@@ -174,7 +180,7 @@ public class CliMain {
         }
     }
 
-    private static void vendorMenu(VendorController vendorController) throws Exception {
+    private static void vendorMenu(VendorController vendorController, TicketPoolController ticketPoolController) throws Exception {
         boolean exitVendorMenu = false;
         EventController eventController = new EventController();
 
@@ -192,7 +198,7 @@ public class CliMain {
             System.out.println("| Option" + " ".repeat(tableWidth - 9 - 1) + "|");
             System.out.println("| 1. View Existing" + " ".repeat(tableWidth - 16 - 1) + "|");
             System.out.println("| 2. Create Event" + " ".repeat(tableWidth - 16 - 1) + "|");
-            System.out.println("| 3. Edit Event" + " ".repeat(tableWidth - 14 - 1) + "|");
+            System.out.println("| 3. Start Event" + " ".repeat(tableWidth - 16 - 1) + "|");
             System.out.println("| 4. Delete Event" + " ".repeat(tableWidth - 16 - 1) + "|");
             System.out.println("| 5. Return to Main" + " ".repeat(tableWidth - 18 - 1) + "|");
 
@@ -200,14 +206,10 @@ public class CliMain {
             System.out.println("+" + "-".repeat(tableWidth - 2) + "+");
 
             // Prompt for user input
-            System.out.print("Enter your choice: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int choice = menuController.getNumberInRange(1,5);
 
             switch (choice) {
                 case 1:
-                    System.out.println(vendorController.getId());
                     eventController.getEventsByVendorId(Integer.parseInt(vendorController.getId()));
                     break;
                 case 2:
@@ -215,11 +217,23 @@ public class CliMain {
                     eventController.createEventFromInput(vendorController.getId());
                     break;
                 case 3:
-                    System.out.println("Editing an event...");
+                    eventController.getEventsByVendorId(Integer.parseInt(vendorController.getId()));
+                    String startId = menuController.getValidInput("Enter the event Id that needs to be started: ", "number");
+                    eventController.activateEvent(Integer.parseInt(startId));
                     break;
                 case 4:
-                    System.out.println("Deleting an event...");
-                    break;
+                    eventController.getEventsByVendorId(Integer.parseInt(vendorController.getId()));
+                    String deleteEventId = menuController.getValidInput("Enter the Event Id that need to be deleted: ", "number");
+                    try {
+                        int eventTotalTickets = eventController.getTotalTicketsOfEvent(Integer.parseInt(deleteEventId));
+                        int currentTotalTickets = Integer.parseInt(configParameters.getTotalTickets());
+                        int updatedTotalTickets = currentTotalTickets - eventTotalTickets;
+                        configParameters.updateProperty("totalTickets", String.valueOf(updatedTotalTickets));
+                        ticketPoolController.deleteTicketPoolByEventId(Integer.parseInt(deleteEventId));
+                        break;
+                    } catch (Exception e) {
+                        break;
+                    }
                 case 5:
                     exitVendorMenu = true;
                     break;
@@ -268,15 +282,12 @@ public class CliMain {
 
         while (!exitCustomerMenu) {
             System.out.println("\n--- Customer Menu ---");
-            System.out.println("1. View Events");
-            System.out.println("2. Book Ticket");
-            System.out.println("3. View Booked Tickets");
-            System.out.println("4. Cancel Ticket");
+            System.out.println("1. Book Ticket");
+            System.out.println("2. View Booked Tickets");
             System.out.println("5. Return to Main Menu");
             System.out.print("Enter your choice: ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int choice = menuController.getNumberInRange(1,3);
 
             switch (choice) {
                 case 1:
@@ -286,12 +297,6 @@ public class CliMain {
                     System.out.println("Booking a ticket...");
                     break;
                 case 3:
-                    System.out.println("Viewing booked tickets...");
-                    break;
-                case 4:
-                    System.out.println("Cancelling a ticket...");
-                    break;
-                case 5:
                     exitCustomerMenu = true;
                     break;
                 default:

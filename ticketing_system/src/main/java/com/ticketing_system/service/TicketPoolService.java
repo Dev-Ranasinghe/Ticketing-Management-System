@@ -9,5 +9,5 @@ public interface TicketPoolService {
     public TicketPool getTicketPoolById(Integer id);
     public TicketPool saveTicketPool(TicketPool ticketPool);
     public void deleteTicketPool(Integer id);
-
+    void deleteTicketPoolByEventId(Integer eventId);
 }

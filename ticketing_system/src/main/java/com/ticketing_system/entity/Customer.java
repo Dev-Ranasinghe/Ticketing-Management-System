@@ -30,4 +30,8 @@ public class Customer {
     public String getCustomerPassword() {
         return customerPassword;
     }
+
+    public Integer getCustomerId() {
+        return customerId;
+    }
 }
