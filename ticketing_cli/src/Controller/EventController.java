@@ -97,7 +97,7 @@ public class EventController {
         String eventLocation = menuController.getValidInput("Enter Event Location: ", "string");
         String totalTickets = menuController.getValidInput("Enter Total Tickets (number): ", "number");
         try {
-        if(Integer.parseInt(totalTickets) >= availableTickets){
+        if(Integer.parseInt(totalTickets) > availableTickets){
             throw new Exception("Error !!! Only " + availableTickets + " more tickets can be handled by the system.");
         }
         boolean eventStatus = false;

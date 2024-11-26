@@ -145,4 +145,16 @@ public class EventServiceImpl implements EventService{
         return event.getTotalTickets();
     }
 
+    //////
+    public Integer getTotalTicketsByVendor(Integer vendorId) {
+        List<Event> events = eventRepository.findByVendor_VendorId(vendorId);
+        return events.stream()
+                .mapToInt(Event::getTotalTickets)
+                .sum();
+    }
+
+    /////
+    public List<Event> getActiveEvents() {
+        return eventRepository.findActiveEvents();
+    }
 }

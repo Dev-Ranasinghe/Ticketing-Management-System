@@ -2,8 +2,11 @@
 package com.ticketing_system.controller;
 
 import com.ticketing_system.entity.Vendor;
+import com.ticketing_system.service.EventServiceImpl;
 import com.ticketing_system.service.VendorServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,8 @@ public class VendorController {
 
     @Autowired
     private VendorServiceImpl vendorServiceImpl;
+    @Autowired
+    private EventServiceImpl eventServiceImpl;
 
     @GetMapping
     public List<Vendor> getAllVendors(){
@@ -65,5 +70,15 @@ public class VendorController {
     @GetMapping("/login")
     public boolean vendorVerification(@RequestParam String username, @RequestParam String password){
         return vendorServiceImpl.vendorVerification(username, password);
+    }
+
+    @GetMapping("/{vendorId}/totalTickets")
+    public ResponseEntity<Integer> getTotalTicketsByVendor(@PathVariable Integer vendorId) {
+        try {
+            Integer totalTickets = eventServiceImpl.getTotalTicketsByVendor(vendorId);
+            return ResponseEntity.ok(totalTickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

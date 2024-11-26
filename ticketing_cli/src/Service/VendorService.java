@@ -1,5 +1,7 @@
 package Service;
 
+import SystemParameters.ConfigParameters;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,6 +12,7 @@ public class VendorService implements Runnable {
 
     private static final ReentrantLock lock = new ReentrantLock();
     private static final HttpClient client = HttpClient.newHttpClient();
+    private final ConfigParameters configParameters = new ConfigParameters();
     private String task;
     private Integer vendorId;
     private String vendorJson;
@@ -50,6 +53,9 @@ public class VendorService implements Runnable {
                         deleteVendor(vendorId);
                     }
                     break;
+                case "fetchActive":
+                    fetchActiveEvents();
+                    break;
                 default:
                     System.out.println("Invalid task specified.");
             }
@@ -57,6 +63,27 @@ public class VendorService implements Runnable {
             lock.unlock();
         }
     }
+
+    public void fetchActiveEvents() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/api/event/active"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Active Events:");
+                System.out.println(response.body());
+            } else {
+                System.out.println("Failed to fetch active events. Status code: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void fetchAllVendors() {
         try {
@@ -147,6 +174,7 @@ public class VendorService implements Runnable {
     }
 
     public void saveVendor(String vendorJson) {
+        lock.lock();
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/api/vendor"))
@@ -157,22 +185,62 @@ public class VendorService implements Runnable {
             System.out.println("Saved Vendor: " + response.body());
         } catch (Exception e) {
             e.printStackTrace();
+        }  finally {
+            lock.unlock();
+        }
+    }
+
+    public Integer getTotalTicketsByVendor(Integer vendorId) {
+        try {
+            // Build the request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/vendor/" + vendorId + "/totalTickets"))
+                    .GET()
+                    .build();
+
+            // Send the request and get the response
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Parse the response body to an Integer
+            if (response.statusCode() == 200) {
+                return Integer.parseInt(response.body().trim());
+            } else {
+                System.err.println("Failed to fetch total tickets. HTTP Status: " + response.statusCode());
+                return 0; // Default to 0 if there's an issue
+            }
+        } catch (Exception e) {
+            System.err.println("Exception occurred while fetching total tickets: " + e.getMessage());
+            return 0; // Default to 0 if an exception occurs
         }
     }
 
     public void deleteVendor(int vendorId) {
         lock.lock();
         try {
+            Integer totalTickets = getTotalTicketsByVendor(vendorId);
+            if (totalTickets == null) {
+                totalTickets = 0; // Default to 0 if no tickets are found
+            }
+
+            int updatedTotalTickets = totalTickets - Integer.parseInt(configParameters.getTotalTickets());
+            configParameters.updateProperty("totalTickets", String.valueOf(updatedTotalTickets));
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/api/vendor/" + vendorId))
                     .DELETE()
                     .build();
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Vendor Deletion Success.");
+            if (response.statusCode() == 200) {
+                System.out.println("Vendor deletion successful.");
+            } else {
+                System.out.println("Failed to delete vendor. Status code: " + response.statusCode());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
         }
     }
+
 }

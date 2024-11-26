@@ -31,6 +31,7 @@ public class Vendor {
     private String vendorPassword;
     @OneToMany(mappedBy = "vendor", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonManagedReference
+    @ToString.Exclude // Prevent circular reference in toString
     private List<Event> events = new ArrayList<>();
 
     public Vendor(String vendorPassword, String vendorEmail, String vendorName, String vendorContact, Integer vendorId) {

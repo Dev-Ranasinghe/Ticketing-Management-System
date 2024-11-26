@@ -1,7 +1,9 @@
 package Controller;
 
 import Service.VendorService;
+import SystemParameters.ConfigParameters;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -29,6 +31,18 @@ public class VendorController {
     public String getUsername() {
         return this.username;
     }
+
+    public void getActiveEvents() {
+        VendorService service = new VendorService("fetchActive", null, null, null);
+        Thread thread = new Thread(service);
+        thread.start();
+        try {
+            thread.join();  // Waits for this thread to complete
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void getAllVendors() {
         // Create a new thread for each service task and start it
@@ -88,7 +102,8 @@ public class VendorController {
         Thread thread = new Thread(service);
         thread.start();
         try {
-            thread.join();  // Waits for this thread to complete before moving on
+            thread.join(); // Waits for this thread to complete before moving on
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -12,5 +12,4 @@ public interface VendorService{
     public void deleteVendor(Integer id);
     public boolean vendorVerification(String username, String password);
 //    public Integer findVendorIdByVendorEmail(String email);
-
 }

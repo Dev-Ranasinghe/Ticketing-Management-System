@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +29,15 @@ public class Event {
     @Column(name = "totalTickets", nullable = false)
     private Integer totalTickets;
     @Column(name = "ticket_price", nullable = false)
-//    private Integer ticketPrice;
-//    @Column(name = "eventStatus", nullable = false)
     private boolean eventStatus;
     @ManyToOne
     @JoinColumn(name = "vendor_id", referencedColumnName = "vendor_id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude // Prevent circular reference in toString
     private Vendor vendor;
     @OneToOne(mappedBy = "event", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonManagedReference
+    @ToString.Exclude // Prevent circular reference in toString
     private TicketPool ticketPool;
 
     public Event(Integer eventId, Vendor vendor, boolean eventStatus, String eventLocation, String eventName, Integer totalTickets) {

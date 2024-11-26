@@ -1,5 +1,4 @@
 import Controller.*;
-import Service.TicketPoolService;
 import SystemParameters.ConfigParameters;
 
 import java.io.IOException;
@@ -89,18 +88,24 @@ public class CliMain {
     }
 
     private static void handleCustomerLogin() {
-
         String response = menuController.getYesOrNo("Are you a registered customer? (y/n): ");
+
         CustomerController customerController = new CustomerController();
+        TicketPoolController ticketPoolController = new TicketPoolController();
+
         if (response.equals("y")) {
             if (customerLogin(customerController)) {
-                customerMenu();
+                System.out.println("Login successful.");
+                // After successful login, proceed directly to vendor menu
+                customerMenu(customerController, ticketPoolController); // Pass the vendorController object
             } else {
                 System.out.println("Invalid login. Returning to main menu.");
             }
-        } else if (response.equals("no")) {
-
-        } else {
+        }
+        else if(response.equals("n")){
+            customerController.createCustomerFromInput();
+        }
+        else {
             System.out.println("Invalid response. Returning to main menu.");
         }
     }
@@ -131,7 +136,6 @@ public class CliMain {
         if (customerController.customerVerification(username, password)) {
             // Store username in the controller for further use
             customerController.setUsername(username);
-//            customerController.ge(username);
             return true;
         }
         return false;
@@ -156,8 +160,8 @@ public class CliMain {
                 case 2:
                     System.out.println("Managing vendors...");
                     vendorController.getAllVendors();
-                    if(MenuController.adminDeleteManagement("customer")){
-                        System.out.print("Enter the ID of the customer that needs to be deleted: ");
+                    if(MenuController.adminDeleteManagement("vendor")){
+                        System.out.print("Enter the ID of the vendor that needs to be deleted: ");
                         String deleteId = scanner.nextLine();
                         vendorController.deleteVendor(Integer.parseInt(deleteId));
                     };
@@ -185,25 +189,41 @@ public class CliMain {
         EventController eventController = new EventController();
 
         while (!exitVendorMenu) {
+
+            String username = "VendorName";  // replace with vendorController.getUsername()
+
+            // Define the header and options
             String header = "--- " + vendorController.getUsername() + " Vendor Menu ---";
-            int tableWidth = Math.max(header.length(), 38); // Ensures the table width accommodates the header
+            String option1 = "1. View Existing";
+            String option2 = "2. Create Event";
+            String option3 = "3. Start Event";
+            String option4 = "4. Delete Event";
+            String option5 = "5. Return to Main";
 
-            // Print the vendor menu in a table format
-            System.out.println("\n" + header);
+            // Define the fixed width for the table (same as the longest line)
+            int tableWidth = 40;  // You can adjust this width to your preference
 
-            // Print top border of the table
-            System.out.println("+".repeat(tableWidth));
+            // Print the vendor menu in a simple format
+            String border = "+" + "-".repeat(tableWidth - 2) + "+";  // Border line
+
+            // Print top border
+            System.out.println("\n" + border);
+
+            // Print header line
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", header) + " |");
+
+            // Print border after header
+            System.out.println(border);
 
             // Print the options
-            System.out.println("| Option" + " ".repeat(tableWidth - 9 - 1) + "|");
-            System.out.println("| 1. View Existing" + " ".repeat(tableWidth - 16 - 1) + "|");
-            System.out.println("| 2. Create Event" + " ".repeat(tableWidth - 16 - 1) + "|");
-            System.out.println("| 3. Start Event" + " ".repeat(tableWidth - 16 - 1) + "|");
-            System.out.println("| 4. Delete Event" + " ".repeat(tableWidth - 16 - 1) + "|");
-            System.out.println("| 5. Return to Main" + " ".repeat(tableWidth - 18 - 1) + "|");
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", option1) + " |");
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", option2) + " |");
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", option3) + " |");
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", option4) + " |");
+            System.out.println("| " + String.format("%-" + (tableWidth - 2) + "s", option5) + " |");
 
             // Print bottom border of the table
-            System.out.println("+" + "-".repeat(tableWidth - 2) + "+");
+            System.out.println(border);
 
             // Prompt for user input
             int choice = menuController.getNumberInRange(1,5);
@@ -277,7 +297,7 @@ public class CliMain {
         }
     }
 
-    private static void customerMenu() {
+    private static void customerMenu(CustomerController customerController, TicketPoolController ticketPoolController) {
         boolean exitCustomerMenu = false;
 
         while (!exitCustomerMenu) {

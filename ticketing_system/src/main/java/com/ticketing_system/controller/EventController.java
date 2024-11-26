@@ -35,6 +35,11 @@ public class EventController {
         return eventServiceImpl.getEventsByVendorId(vendorId);
     }
 
+    @GetMapping("/total-events/active")
+    public List<Event> getActiveEvents() {
+        return eventServiceImpl.getActiveEvents();
+    }
+
     @GetMapping("/{eventId}/totalTickets")
     public ResponseEntity<Integer> getTotalTicketsByEventId(@PathVariable Integer eventId) {
         try {
@@ -65,4 +70,7 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    /////
+
 }
